@@ -141,17 +141,19 @@ import { setIsSidebarCollapsed } from '../state';
             isCollapsed={isSidebarCollapsed}
             // isCollapsed={true}
           />
-          <SidebarLink
-            href="/settings"
-            icon={SlidersHorizontal}
-            label="Settings"
-            isCollapsed={isSidebarCollapsed}
-            // isCollapsed={true}
-          />
+        
           <SidebarLink
             href="/expenses"
             icon={CircleDollarSign}
             label="Expenses"
+            isCollapsed={isSidebarCollapsed}
+            // isCollapsed={true}
+          />
+
+<SidebarLink
+            href="/settings"
+            icon={SlidersHorizontal}
+            label="Settings"
             isCollapsed={isSidebarCollapsed}
             // isCollapsed={true}
           />
