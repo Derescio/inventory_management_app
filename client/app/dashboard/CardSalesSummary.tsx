@@ -1,3 +1,4 @@
+'use client'
 import { useGetDashboardMetricsQuery } from "@/app/state/api";
 import { TrendingUp } from "lucide-react";
 import React, { useState } from "react";
@@ -11,23 +12,43 @@ import {
   YAxis,
 } from "recharts";
 
+
+
 const CardSalesSummary = () => {
   const { data, isLoading, isError } = useGetDashboardMetricsQuery();
+  const [timeframe, setTimeframe] = useState("monthly");
+
+  const processData = (data: any[], timeframe: string) => {
+    const now = new Date();
+    const filteredData = data.filter(item => {
+      const itemDate = new Date(item.date);
+      switch(timeframe) {
+        case 'daily':
+          return itemDate >= new Date(now.setDate(now.getDate() - 7));
+        case 'weekly':
+          return itemDate >= new Date(now.setDate(now.getDate() - 30));
+        case 'monthly':
+          return itemDate >= new Date(now.setFullYear(now.getFullYear() - 1));
+        default:
+          return true;
+      }
+    });
+  
+    return filteredData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
+
   const salesData = data?.salesSummary || [];
+  const processedData = processData(salesData, timeframe);
 
-  const [timeframe, setTimeframe] = useState("weekly");
+  const totalValueSum = processedData.reduce((acc, curr) => acc + curr.totalValue, 0) || 0;
 
-  const totalValueSum =
-    salesData.reduce((acc, curr) => acc + curr.totalValue, 0) || 0;
-
-  const averageChangePercentage =
-    salesData.reduce((acc, curr, _, array) => {
-      return acc + curr.changePercentage! / array.length;
-    }, 0) || 0;
-
-  const highestValueData = salesData.reduce((acc, curr) => {
+  const averageChangePercentage = processedData.reduce((acc, curr, _, array) => {
+    return acc + curr.changePercentage / array.length;
+  }, 0) || 0;
+  
+  const highestValueData = processedData.reduce((acc, curr) => {
     return acc.totalValue > curr.totalValue ? acc : curr;
-  }, salesData[0] || {});
+  }, processedData[0] || {});
 
   const highestValueDate = highestValueData.date
     ? new Date(highestValueData.date).toLocaleDateString("en-US", {
@@ -88,7 +109,7 @@ const CardSalesSummary = () => {
             {/* CHART */}
             <ResponsiveContainer width="100%" height={350} className="px-7">
               <BarChart
-                data={salesData}
+                data={processedData}
                 margin={{ top: 0, right: 0, left: -25, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="" vertical={false} />
@@ -101,7 +122,7 @@ const CardSalesSummary = () => {
                 />
                 <YAxis
                   tickFormatter={(value) => {
-                    return `$${(value / 1000000).toFixed(0)}m`;
+                    return `${(value / 1000000).toFixed(0)}m`;
                   }}
                   tick={{ fontSize: 12, dx: -1 }}
                   tickLine={false}
@@ -109,7 +130,7 @@ const CardSalesSummary = () => {
                 />
                 <Tooltip
                   formatter={(value: number) => [
-                    `$${value.toLocaleString("en")}`,
+                    `${value.toLocaleString("en")}`,
                   ]}
                   labelFormatter={(label) => {
                     const date = new Date(label);
