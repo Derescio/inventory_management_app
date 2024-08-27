@@ -17,7 +17,7 @@ const columns: GridColDef[] = [
   {
     field: "rating",
     headerName: "Rating",
-    width: 110,
+    width: 10,
     type: "number",
     valueGetter: (value, row) => (row.rating ? row.rating : "N/A"),
   },
@@ -28,6 +28,7 @@ const columns: GridColDef[] = [
     type: "number",
   },
 ];
+
 
 const Inventory = () => {
   const { data: products, isError, isLoading } = useGetProductsQuery();
@@ -43,6 +44,7 @@ const Inventory = () => {
       </div>
     );
   }
+
 
   return (
     <div className="flex flex-col">
